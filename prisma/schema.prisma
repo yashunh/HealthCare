@@ -1,0 +1,84 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model Doctor {
+  ID        String   @id @default(auto()) @map("_id") @db.ObjectId
+  Name      String
+  PatientId   String[]     @db.ObjectId
+  Patient      Patient       @relation(fields: [PatientId], references: [ID])
+  appointment Appointment[]
+}
+
+model Patient {
+  ID        String   @id @default(auto()) @map("_id") @db.ObjectId
+  Age       Int
+  Name      String
+  BloodGroup String?
+  Sex       String 
+  doctor     Doctor[]
+  appointment Appointment[]
+  prescription Prescription[]
+  vitals Vital[]
+  report Report[]
+  medication Medication[]
+}
+
+model Appointment {
+  ID        String   @id @default(auto()) @map("_id") @db.ObjectId
+  Date      DateTime @default(now())
+  IsDone    Boolean @default(false)
+  DoctorId    String     @db.ObjectId
+  Doctor      Doctor    @relation(fields: [DoctorId], references: [ID])
+  PatientId   String     @db.ObjectId
+  Patient      Patient       @relation(fields: [PatientId], references: [ID])
+  Prescription Prescription[]
+}
+
+model Prescription {
+  ID        String   @id @default(auto()) @map("_id") @db.ObjectId
+  CurrentCondition String
+  Diagnosis String
+  Treatment String
+  Advice String?
+  AppointmentId String  @db.ObjectId
+  Appointment Appointment   @relation(fields: [AppointmentId], references: [ID])
+  PatientId   String     @db.ObjectId
+  Patient      Patient       @relation(fields: [PatientId], references: [ID])
+  Vitals Vital[]
+  reports Report[]
+  medication Medication[]
+}
+
+model Vital {
+  ID        String   @id @default(auto()) @map("_id") @db.ObjectId
+  Vitals    Json     
+  PatientId   String     @db.ObjectId
+  Patient      Patient       @relation(fields: [PatientId], references: [ID]) 
+  PrescriptionID String  @db.ObjectId
+  Prescription    Prescription   @relation(fields: [PrescriptionID], references: [ID])
+}
+
+model Report {
+  ID        String   @id @default(auto()) @map("_id") @db.ObjectId
+  URL       String
+  PatientId   String     @db.ObjectId
+  Patient      Patient       @relation(fields: [PatientId], references: [ID]) 
+  PrescriptionID String  @db.ObjectId
+  Prescription    Prescription   @relation(fields: [PrescriptionID], references: [ID])
+}
+
+model Medication {
+  ID        String   @id @default(auto()) @map("_id") @db.ObjectId
+  Medication   Json 
+  Dose Json    
+  PatientId   String     @db.ObjectId
+  Patient      Patient       @relation(fields: [PatientId], references: [ID]) 
+  PrescriptionID String  @db.ObjectId
+  Prescription    Prescription   @relation(fields: [PrescriptionID], references: [ID])
+}
