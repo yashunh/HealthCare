@@ -35,7 +35,8 @@ model Patient {
 
 model Appointment {
   ID        String   @id @default(auto()) @map("_id") @db.ObjectId
-  Date      DateTime @default(now())
+  Date      String 
+  Time       String
   IsDone    Boolean @default(false)
   DoctorId    String     
   Doctor      Doctor    @relation(fields: [DoctorId], references: [UID])

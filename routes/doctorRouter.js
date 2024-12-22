@@ -1,30 +1,11 @@
 import express from "express"
 import { PrismaClient } from "@prisma/client"
-import zod from "zod"
 import jwt from "jsonwebtoken"
 import { authMiddleware } from "../middleware/authMiddleware.js"
+import { signupBody, signinBody, uidSchema} from "../zod/zod.js"
 
 const router = express.Router()
 const prisma = new PrismaClient()
-
-const passwordSchema = zod.string().min(8).max(20).regex(/[A-Z]/).regex(/[a-z]/).regex(/[0-9]/).regex(/[!@#$%^&*]/);
-
-const uidSchema = zod.string()
-
-const signupBody = zod.object({
-    uid: uidSchema,
-    password: passwordSchema,
-    name: zod.string()
-})
-
-const signinBody = zod.object({
-    uid: uidSchema,
-    password: passwordSchema
-})
-
-const newPatientSchema = zod.object({
-    
-})
 
 router.post("/signup", async (req,res)=>{
     const { success } = signupBody.safeParse(req.body)
@@ -109,7 +90,22 @@ router.get('/signin', async (req,res)=>{
     })
 })
 
-router.get('/latestAppointment', authMiddleware ,async (req,res)=>{
+router.post('/newPatient', authMiddleware, async (req, res)=>{
+    const { success } = uidSchema.safeParse(req.body)
+    if (!success) {
+        return res.status(411).json({
+            message: "Incorrect uid",
+        })
+    }
+
+    const result = await prisma.patient.create({
+        data:{
+            
+        }
+    })
+})
+
+router.get('/latestPatient', authMiddleware ,async (req,res)=>{
     const { success } = uidSchema.safeParse(req.body)
     if (!success) {
         return res.status(411).json({
@@ -129,21 +125,6 @@ router.get('/latestAppointment', authMiddleware ,async (req,res)=>{
     })
 
     return res.json(result)
-})
-
-router.post('/newPatient', authMiddleware, async (req, res)=>{
-    const { success } = uidSchema.safeParse(req.body)
-    if (!success) {
-        return res.status(411).json({
-            message: "Incorrect uid",
-        })
-    }
-
-    const result = await prisma.patient.create({
-        data:{
-
-        }
-    })
 })
 
 export const docRouter = router
