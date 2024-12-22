@@ -1,13 +1,13 @@
+import express from "express"
 import { PrismaClient  } from "@prisma/client";
-const prisma = new PrismaClient();
+import { docRouter } from "./routes/doctorRouter.js";
 
-async function ab(){
-   const res = await prisma.doctor.create({
-    data: {
-        Name: "sgfcsg",
-        
-    }
-   }) 
-   console.log(res)
-}
-//ab()
+const prisma = new PrismaClient();
+const  app = express()
+app.use(express.json())
+
+app.use('/doctor',docRouter)
+
+app.listen(3000, ()=>{
+    console.log('server is running at 3000')
+})

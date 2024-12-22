@@ -9,14 +9,18 @@ datasource db {
 
 model Doctor {
   ID        String   @id @default(auto()) @map("_id") @db.ObjectId
+  UID        String   @unique
+  Password   String   
   Name      String
-  PatientId   String[]     @db.ObjectId
-  Patient      Patient       @relation(fields: [PatientId], references: [ID])
+  PatientId   String[]   
+  Patient      Patient       @relation(fields: [PatientId], references: [UID])
   appointment Appointment[]
 }
 
 model Patient {
   ID        String   @id @default(auto()) @map("_id") @db.ObjectId
+  UID        String   @unique
+  Password   String   
   Age       Int
   Name      String
   BloodGroup String?
@@ -33,10 +37,10 @@ model Appointment {
   ID        String   @id @default(auto()) @map("_id") @db.ObjectId
   Date      DateTime @default(now())
   IsDone    Boolean @default(false)
-  DoctorId    String     @db.ObjectId
-  Doctor      Doctor    @relation(fields: [DoctorId], references: [ID])
-  PatientId   String     @db.ObjectId
-  Patient      Patient       @relation(fields: [PatientId], references: [ID])
+  DoctorId    String     
+  Doctor      Doctor    @relation(fields: [DoctorId], references: [UID])
+  PatientId   String    
+  Patient      Patient       @relation(fields: [PatientId], references: [UID])
   Prescription Prescription[]
 }
 
@@ -48,8 +52,8 @@ model Prescription {
   Advice String?
   AppointmentId String  @db.ObjectId
   Appointment Appointment   @relation(fields: [AppointmentId], references: [ID])
-  PatientId   String     @db.ObjectId
-  Patient      Patient       @relation(fields: [PatientId], references: [ID])
+  PatientId   String   
+  Patient      Patient       @relation(fields: [PatientId], references: [UID])
   Vitals Vital[]
   reports Report[]
   medication Medication[]
@@ -58,8 +62,8 @@ model Prescription {
 model Vital {
   ID        String   @id @default(auto()) @map("_id") @db.ObjectId
   Vitals    Json     
-  PatientId   String     @db.ObjectId
-  Patient      Patient       @relation(fields: [PatientId], references: [ID]) 
+  PatientId   String    
+  Patient      Patient       @relation(fields: [PatientId], references: [UID]) 
   PrescriptionID String  @db.ObjectId
   Prescription    Prescription   @relation(fields: [PrescriptionID], references: [ID])
 }
@@ -67,8 +71,8 @@ model Vital {
 model Report {
   ID        String   @id @default(auto()) @map("_id") @db.ObjectId
   URL       String
-  PatientId   String     @db.ObjectId
-  Patient      Patient       @relation(fields: [PatientId], references: [ID]) 
+  PatientId   String   
+  Patient      Patient       @relation(fields: [PatientId], references: [UID]) 
   PrescriptionID String  @db.ObjectId
   Prescription    Prescription   @relation(fields: [PrescriptionID], references: [ID])
 }
@@ -77,8 +81,14 @@ model Medication {
   ID        String   @id @default(auto()) @map("_id") @db.ObjectId
   Medication   Json 
   Dose Json    
-  PatientId   String     @db.ObjectId
-  Patient      Patient       @relation(fields: [PatientId], references: [ID]) 
+  PatientId   String  
+  Patient      Patient       @relation(fields: [PatientId], references: [UID]) 
   PrescriptionID String  @db.ObjectId
   Prescription    Prescription   @relation(fields: [PrescriptionID], references: [ID])
+}
+
+model Counter {
+  ID        String   @id @default(auto()) @map("_id") @db.ObjectId
+  Name String 
+  Count Int @default(0)
 }
