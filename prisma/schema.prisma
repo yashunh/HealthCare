@@ -15,6 +15,7 @@ model Doctor {
   PatientId   String[]   
   Patient      Patient       @relation(fields: [PatientId], references: [UID])
   appointment Appointment[]
+  prescription Prescription[]
 }
 
 model Patient {
@@ -55,6 +56,8 @@ model Prescription {
   Appointment Appointment   @relation(fields: [AppointmentId], references: [ID])
   PatientId   String   
   Patient      Patient       @relation(fields: [PatientId], references: [UID])
+  DoctorId    String     
+  Doctor      Doctor    @relation(fields: [DoctorId], references: [UID])
   Vitals Vital[]
   reports Report[]
   medication Medication[]

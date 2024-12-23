@@ -8,7 +8,7 @@ export const authMiddleware = async(req,res,next) => {
     const token = headers.split(' ')[1]
     try{
         const result = await jwt.verify(token, process.env.JWT_SECRET)
-        req.body.uid = result.uid
+        req.body.doctorId = result.doctorId
         next()
     }
     catch(err){
