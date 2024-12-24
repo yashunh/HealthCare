@@ -1,4 +1,4 @@
-import zod from "zod"
+import zod, { date } from "zod"
 
 export const passwordSchema = zod.string().min(8).max(20).regex(/[A-Z]/).regex(/[a-z]/).regex(/[0-9]/).regex(/[!@#$%^&*]/);
 
@@ -6,7 +6,13 @@ export const doctorIdSchema = zod.string()
 
 export const patientIdSchema = zod.string()
 
-export const appointmentIdSchema = zod.string();
+export const appointmentIdSchema = zod.string()
+
+export const prescriptionIdSchema = zod.string()
+
+export const timeSchema = zod.string().regex(`^(0[0-9]|1[0-9]|2[0-4])\.(0[0-9]|[1-5][0-9])-(0[0-9]|1[0-9]|2[0-4])\.(0[0-9]|[1-5][0-9])$`)
+
+export const dateSchema =  zod.string().regex(`^(0[1-9]|1[0-2])\/(0[1-9]|[1-2][0-9]|3[0-1])\/(202[4-9]|20[3-9][0-9])$`)
 
 export const signupBody = zod.object({
     doctorId: doctorIdSchema,
@@ -32,8 +38,8 @@ export const newPatientSchema = zod.object({
 export const createAppointmentSchema = zod.object({
     doctorId: doctorIdSchema,
     patientId: patientIdSchema,
-    time: zod.string().regex(`^(0[0-9]|1[0-9]|2[0-4])\.(0[0-9]|[1-5][0-9])-(0[0-9]|1[0-9]|2[0-4])\.(0[0-9]|[1-5][0-9])$`),
-    date: zod.string().regex(`^(0[1-9]|1[0-2])\/(0[1-9]|[1-2][0-9]|3[0-1])\/(202[4-9]|20[3-9][0-9])$`)
+    time: timeSchema,
+    date: dateSchema
 })
 
 export const completeAppointmentSchema = zod.object({
@@ -42,11 +48,26 @@ export const completeAppointmentSchema = zod.object({
 })
 
 export const createPrescriptionSchema = zod.object({
-    doctorID: doctorIdSchema,
+    prescription: zod.object({
+        appointmentId: appointmentIdSchema,
+        currentCondition: zod.string(),
+        diagnosis: zod.string(),
+        treatment: zod.string(),
+        advice: zod.string().optional()
+    }),
+    medication: zod.object({
+        medicine: zod.object(),
+        dose: zod.object()
+    }),
+    reportUrl: zod.array().string().url(),
+    vitals: zod.object(),
     patientId: patientIdSchema,
-    appointmentId: appointmentIdSchema,
-    currentCondition: zod.string(),
-    diagnosis: zod.string(),
-    treatment: zod.string(),
-    advice: zod.string().optional()
+    date: dateSchema,
+    time: timeSchema,
+    doctorId: doctorIdSchema
+})
+
+export const getPrescriptionSchema = zod.object({
+    doctorId: doctorIdSchema,
+    patientId: patientIdSchema
 })

@@ -52,6 +52,8 @@ model Prescription {
   Diagnosis String
   Treatment String
   Advice String?
+  Date      String 
+  Time       String
   AppointmentId String  @db.ObjectId
   Appointment Appointment   @relation(fields: [AppointmentId], references: [ID])
   PatientId   String   
@@ -65,7 +67,9 @@ model Prescription {
 
 model Vital {
   ID        String   @id @default(auto()) @map("_id") @db.ObjectId
-  Vitals    Json     
+  Vitals    Json   
+  Date      String 
+  Time       String  
   PatientId   String    
   Patient      Patient       @relation(fields: [PatientId], references: [UID]) 
   PrescriptionID String  @db.ObjectId
@@ -74,7 +78,9 @@ model Vital {
 
 model Report {
   ID        String   @id @default(auto()) @map("_id") @db.ObjectId
-  URL       String
+  URL       String[]
+  Date      String 
+  Time       String
   PatientId   String   
   Patient      Patient       @relation(fields: [PatientId], references: [UID]) 
   PrescriptionID String  @db.ObjectId
@@ -83,8 +89,10 @@ model Report {
 
 model Medication {
   ID        String   @id @default(auto()) @map("_id") @db.ObjectId
-  Medication   Json 
-  Dose Json    
+  Medicine   Json 
+  Dose        Json    
+  Date      String 
+  Time       String
   PatientId   String  
   Patient      Patient       @relation(fields: [PatientId], references: [UID]) 
   PrescriptionID String  @db.ObjectId
