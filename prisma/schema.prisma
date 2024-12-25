@@ -36,8 +36,7 @@ model Patient {
 
 model Appointment {
   ID        String   @id @default(auto()) @map("_id") @db.ObjectId
-  Date      String 
-  Time       String
+  DateTime     DateTime @default(now())
   IsDone    Boolean @default(false)
   DoctorId    String     
   Doctor      Doctor    @relation(fields: [DoctorId], references: [UID])
@@ -52,8 +51,7 @@ model Prescription {
   Diagnosis String
   Treatment String
   Advice String?
-  Date      String 
-  Time       String
+  DateTime     DateTime @default(now())
   AppointmentId String  @db.ObjectId
   Appointment Appointment   @relation(fields: [AppointmentId], references: [ID])
   PatientId   String   
@@ -67,9 +65,7 @@ model Prescription {
 
 model Vital {
   ID        String   @id @default(auto()) @map("_id") @db.ObjectId
-  Vitals    Json   
-  Date      String 
-  Time       String  
+  Vitals    Json    
   PatientId   String    
   Patient      Patient       @relation(fields: [PatientId], references: [UID]) 
   PrescriptionID String  @db.ObjectId
@@ -79,8 +75,6 @@ model Vital {
 model Report {
   ID        String   @id @default(auto()) @map("_id") @db.ObjectId
   URL       String[]
-  Date      String 
-  Time       String
   PatientId   String   
   Patient      Patient       @relation(fields: [PatientId], references: [UID]) 
   PrescriptionID String  @db.ObjectId
@@ -91,8 +85,6 @@ model Medication {
   ID        String   @id @default(auto()) @map("_id") @db.ObjectId
   Medicine   Json 
   Dose        Json    
-  Date      String 
-  Time       String
   PatientId   String  
   Patient      Patient       @relation(fields: [PatientId], references: [UID]) 
   PrescriptionID String  @db.ObjectId
