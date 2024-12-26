@@ -13,8 +13,10 @@ router.post('/create', authMiddleware, async (req, res)=>{
             message: "Incorrect inputs",
         })
     }
-    const { patientId, doctorId, date, time, } = req.body
+    const { patientId, doctorId } = req.body
     const { appointmentId, currentCondition, diagnosis, treatment, advice} = req.body.prescription
+    let dateTime = new Date()
+    dateTime.setUTCHours(dateTime.getUTCHours()-5,dateTime.getUTCMinutes()-30)
     const prescription = await prisma.prescription.create({
         data: {
             DoctorId: doctorId,
@@ -24,17 +26,14 @@ router.post('/create', authMiddleware, async (req, res)=>{
             Diagnosis: diagnosis,
             Treatment: treatment,
             Advice: advice || "",
-            Date: date,
-            Time: time
+            DateTime: dateTime
         }
     })
     const vital = await prisma.vital.create({
         data: {
             Vitals: req.body.vitals,
             PrescriptionID: prescription.ID,
-            PatientId: patientId,
-            Date: date,
-            Time: time
+            PatientId: patientId
         }
     })
     const medication = await prisma.medication.create({
@@ -42,18 +41,14 @@ router.post('/create', authMiddleware, async (req, res)=>{
             Medicine: req.body.medication.medication,
             Dose: req.body.medication.dose,
             PrescriptionID: prescription.ID,
-            PatientId: patientId,
-            Date: date,
-            Time: time
+            PatientId: patientId
         }
     })
     const report = await prisma.report.create({
         data: {
             URL: req.body.reportUrl,
             PrescriptionID: prescription.ID,
-            PatientId: patientId,
-            Date: date,
-            Time: time
+            PatientId: patientId
         }
     })
     return res.send({

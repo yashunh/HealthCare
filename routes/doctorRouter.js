@@ -2,7 +2,7 @@ import express from "express"
 import { PrismaClient } from "@prisma/client"
 import jwt from "jsonwebtoken"
 import { authMiddleware } from "../middleware/authMiddleware.js"
-import { signupBody, signinBody, doctorIdSchema, newPatientSchema} from "../zod/zod.js"
+import { signupBody, signinBody, doctorIdSchema, newPatientSchema, addPatientSchema} from "../zod/zod.js"
 
 const router = express.Router()
 const prisma = new PrismaClient()
@@ -51,8 +51,7 @@ router.post("/signup", async (req,res)=>{
 
     const token = jwt.sign({doctorId: newDoc.UID}, process.env.JWT_SECRET)
     return res.json({
-        msg: "user created",
-        doctorId: newDoc.UID,
+        newDoc,
         token
     })
 })
@@ -98,7 +97,8 @@ router.post('/newPatient', authMiddleware, async (req, res)=>{
         })
     }
 
-    const { patientId, doctorId, password, sex, age, name, bloodGroup } = req.body
+    const { doctorId, password, sex, age, name, bloodGroup } = req.body
+    const patientId = Math.ceil(Math.random()*100)
     const result = await prisma.patient.create({
         data:{
             UID: patientId,
@@ -165,6 +165,36 @@ router.get('/latestPatient', authMiddleware ,async (req,res)=>{
         }
     })
 
+    return res.json(result)
+})
+
+router.post('addPaitent',  authMiddleware ,async (req,res)=>{
+    const { success } = addPatientSchema.safeParse(req.body)
+    if (!success) {
+        return res.status(411).json({
+            message: "Incorrect doctorId or patientId",
+        })
+    }
+
+    const doc = await prisma.doctor.findFirst({
+        where:{
+            UID: req.body.doctorId
+        }
+    })
+    const patient = await prisma.patient.findFirst({
+        where: {
+            UID: req.body.patientIds
+        }
+    })
+    doc.PatientId.push(patient.UID)
+    await prisma.doctor.update({
+        where: {
+            UID: doctorId
+        },
+        data:{
+            PatientId: doc.PatientId
+        }
+    })
     return res.json(result)
 })
 

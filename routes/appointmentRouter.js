@@ -92,12 +92,14 @@ router.post('/create', authMiddleware, async(req, res)=>{
             message: "Incorrect doctorId",
         })
     }
+    let dateTime = new Date(req.body.date)
+    const [hours, minutes] = req.body.time.split(':')
+    dateTime.setUTCHours(parseInt(hours, 10)-5, parseInt(minutes, 10)-30);
     const result = await prisma.appointment.create({
         data: {
             DoctorId: req.body.doctorId,
             PatientId: req.body.patientId,
-            Date: req.body.date,
-            Time: req.body.time
+            DateTime: dateTime
         }
     })
     return res.json(result)
@@ -112,7 +114,6 @@ router.put('/complete',  authMiddleware, async (req,res)=>{
     }
     const result = await prisma.appointment.update({
         where: {
-            DoctorId: req.body.doctorId,
             ID: req.body.appointmentId
         },
         data: {
