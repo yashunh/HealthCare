@@ -6,6 +6,15 @@ import { completeAppointmentSchema, createAppointmentSchema, doctorIdSchema } fr
 const router = express.Router()
 const prisma = new PrismaClient()
 
+const today = new Date();
+let startOfDay = new Date(today);
+let endOfDay = new Date(today);
+startOfDay.setUTCHours(0, 0, 0, 0);
+endOfDay.setUTCHours(23, 59, 59, 999);
+startOfDay.setUTCHours(startOfDay.getUTCHours() - 5, startOfDay.getUTCMinutes() - 30);
+endOfDay.setUTCHours(endOfDay.getUTCHours() - 5, endOfDay.getUTCMinutes() - 30);
+
+
 router.get('/today', authMiddleware, async (req, res)=>{
     const { success } = doctorIdSchema.safeParse(req.body)
     if (!success) {
@@ -19,7 +28,10 @@ router.get('/today', authMiddleware, async (req, res)=>{
         },
         where: {
             DoctorId: req.body.doctorId,
-            Date: new Date().toLocaleDateString()
+            Date: {
+                gte: startOfDay,
+                lte: endOfDay,
+            }
         }
     })
     return res.json(result)
@@ -39,7 +51,10 @@ router.get('/upcoming', authMiddleware, async (req, res)=>{
         where: {
             DoctorId: req.body.doctorId,
             IsDone: false,
-            Date: new Date().toLocaleDateString()
+            Date: {
+                gte: startOfDay,
+                lte: endOfDay,
+            }
         }
     })
     return res.json(result)
@@ -53,13 +68,17 @@ router.get('/current', authMiddleware, async (req, res)=>{
         })
     }
     const result = await prisma.appointment.findFirst({
+        take:1,
         orderBy: {
             Time: "asc"
         },
         where: {
             DoctorId: req.body.doctorId,
             IsDone: false,
-            Date: new Date().toLocaleDateString(),
+            Date: {
+                gte: startOfDay,
+                lte: endOfDay,
+            }
         }
     })
     return res.json(result)
@@ -79,7 +98,10 @@ router.get('/done', authMiddleware, async (req, res)=>{
         where: {
             DoctorId: req.body.doctorId,
             IsDone: true,
-            Date: new Date().toLocaleDateString()
+            Date: {
+                gte: startOfDay,
+                lte: endOfDay,
+            }
         }
     })
     return res.json(result)
@@ -92,9 +114,16 @@ router.post('/create', authMiddleware, async(req, res)=>{
             message: "Incorrect doctorId",
         })
     }
-    let dateTime = new Date(req.body.date)
     const [hours, minutes] = req.body.time.split(':')
-    dateTime.setUTCHours(parseInt(hours, 10)-5, parseInt(minutes, 10)-30);
+    const [year, month, date] = req.body.date.split('-');
+    let dateTime = new Date(
+        parseInt(year, 10),
+        parseInt(month, 10) - 1,
+        parseInt(date, 10),
+        parseInt(hours, 10),
+        parseInt(minutes, 10)
+      );
+    dateTime.setUTCHours(dateTime.getUTCHours() - 5, dateTime.getUTCMinutes() - 30);
     const result = await prisma.appointment.create({
         data: {
             DoctorId: req.body.doctorId,
