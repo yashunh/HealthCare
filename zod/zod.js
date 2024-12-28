@@ -63,7 +63,7 @@ export const createPrescriptionSchema = zod.object({
         medicine: zod.object(),
         dose: zod.object()
     }),
-    reportUrl: zod.array().string().url(),
+    reportUrl: zod.array(zod.string().url()),
     vitals: zod.object(),
     patientId: patientIdSchema,
     doctorId: doctorIdSchema

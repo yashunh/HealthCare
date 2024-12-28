@@ -6,7 +6,7 @@ import { completeAppointmentSchema, createAppointmentSchema, doctorIdSchema } fr
 const router = express.Router()
 const prisma = new PrismaClient()
 
-const today = new Date();
+const today = new Date("2024-03-03");
 let startOfDay = new Date(today);
 let endOfDay = new Date(today);
 startOfDay.setUTCHours(0, 0, 0, 0);
@@ -16,7 +16,7 @@ endOfDay.setUTCHours(endOfDay.getUTCHours() - 5, endOfDay.getUTCMinutes() - 30);
 
 
 router.get('/today', authMiddleware, async (req, res)=>{
-    const { success } = doctorIdSchema.safeParse(req.body)
+    const { success } = doctorIdSchema.safeParse(req.body.doctorId)
     if (!success) {
         return res.status(411).json({
             message: "Incorrect doctorId",
@@ -24,11 +24,11 @@ router.get('/today', authMiddleware, async (req, res)=>{
     }
     const result = await prisma.appointment.findMany({
         orderBy:{
-            Time: "asc"
+            DateTime: "asc"
         },
         where: {
             DoctorId: req.body.doctorId,
-            Date: {
+            DateTime: {
                 gte: startOfDay,
                 lte: endOfDay,
             }
@@ -38,7 +38,7 @@ router.get('/today', authMiddleware, async (req, res)=>{
 })
 
 router.get('/upcoming', authMiddleware, async (req, res)=>{
-    const { success } = doctorIdSchema.safeParse(req.body)
+    const { success } = doctorIdSchema.safeParse(req.body.doctorId)
     if (!success) {
         return res.status(411).json({
             message: "Incorrect doctorId",
@@ -46,12 +46,12 @@ router.get('/upcoming', authMiddleware, async (req, res)=>{
     }
     const result = await prisma.appointment.findMany({
         orderBy:{
-            Time: "asc"
+            DateTime: "asc"
         },
         where: {
             DoctorId: req.body.doctorId,
             IsDone: false,
-            Date: {
+            DateTime: {
                 gte: startOfDay,
                 lte: endOfDay,
             }
@@ -61,7 +61,7 @@ router.get('/upcoming', authMiddleware, async (req, res)=>{
 })
 
 router.get('/current', authMiddleware, async (req, res)=>{
-    const { success } = doctorIdSchema.safeParse(req.body)
+    const { success } = doctorIdSchema.safeParse(req.body.doctorId)
     if (!success) {
         return res.status(411).json({
             message: "Incorrect doctorId",
@@ -70,12 +70,12 @@ router.get('/current', authMiddleware, async (req, res)=>{
     const result = await prisma.appointment.findFirst({
         take:1,
         orderBy: {
-            Time: "asc"
+            DateTime: "asc"
         },
         where: {
             DoctorId: req.body.doctorId,
             IsDone: false,
-            Date: {
+            DateTime: {
                 gte: startOfDay,
                 lte: endOfDay,
             }
@@ -85,7 +85,7 @@ router.get('/current', authMiddleware, async (req, res)=>{
 })
 
 router.get('/done', authMiddleware, async (req, res)=>{
-    const { success } = doctorIdSchema.safeParse(req.body)
+    const { success } = doctorIdSchema.safeParse(req.body.doctorId)
     if (!success) {
         return res.status(411).json({
             message: "Incorrect doctorId",
@@ -93,12 +93,12 @@ router.get('/done', authMiddleware, async (req, res)=>{
     }
     const result = await prisma.appointment.findMany({
         orderBy:{
-            Time: "desc"
+            DateTime: "desc"
         },
         where: {
             DoctorId: req.body.doctorId,
             IsDone: true,
-            Date: {
+            DateTime: {
                 gte: startOfDay,
                 lte: endOfDay,
             }

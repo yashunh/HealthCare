@@ -75,7 +75,7 @@ router.get('/signin', async (req,res)=>{
         })
     }
 
-    if(existingDoc.password !== req.body.password){
+    if(existingDoc.Password !== req.body.password){
         return res.status(411).json({
             message: "Incorrect Password"
         })
@@ -93,12 +93,13 @@ router.post('/newPatient', authMiddleware, async (req, res)=>{
     const { success } = newPatientSchema.safeParse(req.body)
     if (!success) {
         return res.status(411).json({
-            message: "Incorrect doctorId",
+            message: "Incorrect inputs",
+            body: req.body
         })
     }
 
     const { doctorId, password, sex, age, name, bloodGroup } = req.body
-    const patientId = Math.ceil(Math.random()*100)
+    const patientId = Math.ceil(Math.random()*100) + ""
     const result = await prisma.patient.create({
         data:{
             UID: patientId,
@@ -146,18 +147,19 @@ router.post('/newPatient', authMiddleware, async (req, res)=>{
     return res.json(result)
 })
 
+//remain
 router.get('/latestPatient', authMiddleware ,async (req,res)=>{
-    const { success } = doctorIdSchema.safeParse(req.body)
+    const { success } = doctorIdSchema.safeParse(req.body.doctorId)
     if (!success) {
         return res.status(411).json({
-            message: "Incorrect doctorId",
+            message: "Incorrect doctorId"
         })
     }
 
     const result = await prisma.appointment.findMany({
-        take: 15,
+        take: 5,
         orderBy:{
-            Date: 'desc'
+            DateTime: 'desc'
         },
         where: {
             DoctorId: req.body.doctorId,
@@ -168,26 +170,26 @@ router.get('/latestPatient', authMiddleware ,async (req,res)=>{
     return res.json(result)
 })
 
-router.post('addPaitent',  authMiddleware ,async (req,res)=>{
+router.post('/addPaitent',  authMiddleware ,async (req,res)=>{
     const { success } = addPatientSchema.safeParse(req.body)
     if (!success) {
         return res.status(411).json({
             message: "Incorrect doctorId or patientId",
         })
     }
-
+    const {doctorId, patientId} = req.body
     const doc = await prisma.doctor.findFirst({
         where:{
-            UID: req.body.doctorId
+            UID: doctorId
         }
     })
     const patient = await prisma.patient.findFirst({
         where: {
-            UID: req.body.patientIds
+            UID: patientId
         }
     })
     doc.PatientId.push(patient.UID)
-    await prisma.doctor.update({
+    const result = await prisma.doctor.update({
         where: {
             UID: doctorId
         },
