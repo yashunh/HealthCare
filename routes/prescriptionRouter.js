@@ -7,14 +7,15 @@ const router = express.Router()
 const prisma = new PrismaClient()
 
 router.post('/create', authMiddleware, async (req, res)=>{
-    const { success } = createPrescriptionSchema.safeParse(req.body)
-    if (!success) {
+    const result = createPrescriptionSchema.safeParse(req.body)
+    if (!result.success) {
         return res.status(411).json({
             message: "Incorrect inputs",
+            result: result
         })
     }
     const { patientId, doctorId } = req.body
-    const { appointmentId, currentCondition, diagnosis, treatment, advice} = req.body.prescription
+    const { appointmentId, currentCondition, diagnosis, treatment} = req.body.prescription
     let dateTime = new Date()
     dateTime.setUTCHours(dateTime.getUTCHours()-5,dateTime.getUTCMinutes()-30)
     const prescription = await prisma.prescription.create({
@@ -25,37 +26,44 @@ router.post('/create', authMiddleware, async (req, res)=>{
             CurrentCondition: currentCondition,
             Diagnosis: diagnosis,
             Treatment: treatment,
-            Advice: advice || "",
+            Advice: req.body.prescription.advice || "",
             DateTime: dateTime
         }
     })
-    const vital = await prisma.vital.create({
-        data: {
-            Vitals: req.body.vitals,
-            PrescriptionID: prescription.ID,
-            PatientId: patientId
-        }
-    })
-    const medication = await prisma.medication.create({
-        data: {
-            Medicine: req.body.medication.medication,
-            Dose: req.body.medication.dose,
-            PrescriptionID: prescription.ID,
-            PatientId: patientId
-        }
-    })
-    const report = await prisma.report.create({
-        data: {
-            URL: req.body.reportUrl,
-            PrescriptionID: prescription.ID,
-            PatientId: patientId
-        }
-    })
+    let vital,medication,report
+    if(req.body.vitals){
+        vital = await prisma.vital.create({
+            data: {
+                Vitals: req.body.vitals,
+                PrescriptionID: prescription.ID,
+                PatientId: patientId
+            }
+        })
+    }
+    if(req.body.medication){
+        medication = await prisma.medication.create({
+            data: {
+                Medicine: req.body.medication,
+                PrescriptionID: prescription.ID,
+                PatientId: patientId
+            }
+        })
+    }
+    if(req.body.reportUrl){
+        report = await prisma.report.create({
+            data: {
+                URL: req.body.reportUrl,
+                PrescriptionID: prescription.ID,
+                PatientId: patientId
+            }
+        })
+    }
+
     return res.send({
         prescription,
-        vital,
-        report,
-        medication
+        vital: vital || "",
+        report: report || "",
+        medication: medication || "",
     })
 })
 
@@ -70,7 +78,7 @@ router.get('/last', authMiddleware, async (req, res)=>{
     const prescription = await prisma.prescription.findMany({
         take: 1,
         orderBy: {
-            Date: "desc"
+            DateTime: "desc"
         },
         where: {
             PatientId: req.body.patientId

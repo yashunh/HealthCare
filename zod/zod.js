@@ -59,12 +59,20 @@ export const createPrescriptionSchema = zod.object({
         treatment: zod.string(),
         advice: zod.string().optional()
     }),
-    medication: zod.object({
-        medicine: zod.object(),
-        dose: zod.object()
-    }),
-    reportUrl: zod.array(zod.string().url()),
-    vitals: zod.object(),
+    medication: zod.array(zod.object({
+        medicineName: zod.string(),
+        totalQuantity: zod.number(),
+        dose: zod.object({
+            morning: zod.number(),
+            noon: zod.number(),
+            night: zod.number(),
+        }) 
+    })).optional(),
+    reportUrl: zod.array(zod.string().url()).optional(),
+    vitals: zod.array(zod.object({
+        vitalName: zod.string(),
+        value: zod.string()
+    })),
     patientId: patientIdSchema,
     doctorId: doctorIdSchema
 })

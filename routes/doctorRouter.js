@@ -147,7 +147,6 @@ router.post('/newPatient', authMiddleware, async (req, res)=>{
     return res.json(result)
 })
 
-//remain
 router.get('/latestPatient', authMiddleware ,async (req,res)=>{
     const { success } = doctorIdSchema.safeParse(req.body.doctorId)
     if (!success) {

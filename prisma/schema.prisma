@@ -65,7 +65,7 @@ model Prescription {
 
 model Vital {
   ID        String   @id @default(auto()) @map("_id") @db.ObjectId
-  Vitals    Json    
+  Vitals    Json[]   
   PatientId   String    
   Patient      Patient       @relation(fields: [PatientId], references: [UID]) 
   PrescriptionID String  @db.ObjectId
@@ -83,8 +83,7 @@ model Report {
 
 model Medication {
   ID        String   @id @default(auto()) @map("_id") @db.ObjectId
-  Medicine   Json 
-  Dose        Json    
+  Medicine   Json[] 
   PatientId   String  
   Patient      Patient       @relation(fields: [PatientId], references: [UID]) 
   PrescriptionID String  @db.ObjectId
