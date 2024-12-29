@@ -75,7 +75,7 @@ router.get('/last', authMiddleware, async (req, res)=>{
         })
     }
 
-    const prescription = await prisma.prescription.findMany({
+    let prescription = await prisma.prescription.findMany({
         take: 1,
         orderBy: {
             DateTime: "desc"
@@ -84,7 +84,7 @@ router.get('/last', authMiddleware, async (req, res)=>{
             PatientId: req.body.patientId
         }
     })
-
+    prescription = prescription[0]
     const vitals = await prisma.vital.findFirst({
         where: {
             PrescriptionID: prescription.ID
@@ -119,14 +119,14 @@ router.get('/history', authMiddleware, async (req, res)=>{
 
     const result = await prisma.prescription.findMany({
         orderBy: {
-            Date: "desc"
+            DateTime: "desc"
         },
         where: {
             PatientId: req.body.patientId
         },
         select: {
             Diagnosis: true,
-            Date: true
+            DateTime: true
         }
     })
     return res.json(result)
