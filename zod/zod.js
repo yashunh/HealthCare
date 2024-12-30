@@ -81,3 +81,14 @@ export const getPrescriptionSchema = zod.object({
     doctorId: doctorIdSchema,
     patientId: patientIdSchema
 })
+
+export const patientSigninBody = zod.object({
+    patientId: patientIdSchema,
+    password: passwordSchema,
+})
+
+export const patientSignupBody = zod.object({
+    patientId: patientIdSchema,
+    password: passwordSchema,
+    name: zod.string()
+})
