@@ -6,7 +6,7 @@ import { completeAppointmentSchema, createAppointmentSchema, doctorIdSchema } fr
 const router = express.Router()
 const prisma = new PrismaClient()
 
-const today = new Date("2024-03-03");
+const today = new Date();
 let startOfDay = new Date(today);
 let endOfDay = new Date(today);
 startOfDay.setUTCHours(0, 0, 0, 0);

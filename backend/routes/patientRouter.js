@@ -1,6 +1,6 @@
 import express from "express"
 import { PrismaClient } from "@prisma/client"
-import { patientSignupBody, patientSigninBody } from "../zod/zod"
+import { patientSignupBody, patientSigninBody } from "../zod/zod.js"
 
 const router = express.Router()
 const prisma = new PrismaClient()
